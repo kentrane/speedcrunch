@@ -1,0 +1,149 @@
+name: Build SpeedCrunch
+
+on:
+  push:
+    branches: [ main, master, 'claude/**' ]
+  pull_request:
+    branches: [ main, master ]
+  release:
+    types: [ created ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: speedcrunch-linux
+            qt_version: '5.15.2'
+            qt_arch: 'gcc_64'
+          - os: windows-latest
+            artifact_name: speedcrunch-windows
+            qt_version: '5.15.2'
+            qt_arch: 'win64_msvc2019_64'
+          - os: macos-latest
+            artifact_name: speedcrunch-macos
+            qt_version: '5.15.2'
+            qt_arch: 'clang_64'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ matrix.qt_version }}
+        arch: ${{ matrix.qt_arch }}
+        cache: true
+
+    - name: Install Linux dependencies
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev libxkbcommon-x11-0 libxcb-icccm4 \
+          libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 \
+          libxcb-composite0 libxcb-cursor0 libxcb-damage0 libxcb-dpms0 \
+          libxcb-dri2-0 libxcb-dri3-0 libxcb-ewmh2 libxcb-glx0 libxcb-present0 \
+          libxcb-randr0 libxcb-record0 libxcb-render0 libxcb-res0 libxcb-screensaver0 \
+          libxcb-shape0 libxcb-shm0 libxcb-sync1 libxcb-util1
+
+    - name: Configure build (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        mkdir build
+        cd build
+        cmake ../src -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 17 2022" -A x64
+
+    - name: Configure build (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        mkdir build
+        cd build
+        cmake ../src -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        cd build
+        cmake --build . --config Release --parallel
+
+    - name: Build (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        cd build
+        make -j$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+
+    - name: Run tests (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        cd build
+        ctest -C Release --output-on-failure
+
+    - name: Run tests (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        cd build
+        ctest --output-on-failure
+
+    - name: Package (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        cd build
+        make install DESTDIR=AppDir
+        wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+        wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+        chmod +x linuxdeploy*.AppImage
+        ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin qt --output appimage
+        mkdir -p ../artifacts
+        mv SpeedCrunch*.AppImage ../artifacts/SpeedCrunch-Linux-x86_64.AppImage
+
+    - name: Package (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        mkdir artifacts
+        Copy-Item build/Release/speedcrunch.exe artifacts/
+        & $env:Qt5_DIR/bin/windeployqt.exe artifacts/speedcrunch.exe
+        Copy-Item "$env:VCToolsRedistDir/x64/Microsoft.VC*.CRT/*.dll" artifacts/ -ErrorAction SilentlyContinue
+        Compress-Archive -Path artifacts/* -DestinationPath SpeedCrunch-Windows-x64.zip
+        Move-Item SpeedCrunch-Windows-x64.zip artifacts/
+
+    - name: Package (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        cd build
+        make install
+        macdeployqt SpeedCrunch.app -dmg
+        mkdir -p ../artifacts
+        mv SpeedCrunch.dmg ../artifacts/SpeedCrunch-macOS.dmg
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.artifact_name }}
+        path: artifacts/*
+        retention-days: 30
+
+  create-release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: artifacts
+
+    - name: Upload to release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: artifacts/*/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

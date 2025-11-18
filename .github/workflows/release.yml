@@ -1,0 +1,110 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - 'release-*'
+
+jobs:
+  build-and-release:
+    name: Build and Release on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: SpeedCrunch-Linux-x86_64.AppImage
+            qt_version: '5.15.2'
+            qt_arch: 'gcc_64'
+          - os: windows-latest
+            artifact_name: SpeedCrunch-Windows-x64.zip
+            qt_version: '5.15.2'
+            qt_arch: 'win64_msvc2019_64'
+          - os: macos-latest
+            artifact_name: SpeedCrunch-macOS.dmg
+            qt_version: '5.15.2'
+            qt_arch: 'clang_64'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ matrix.qt_version }}
+        arch: ${{ matrix.qt_arch }}
+        cache: true
+
+    - name: Install Linux dependencies
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev libxkbcommon-x11-0 libxcb-icccm4 \
+          libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0
+
+    - name: Configure build (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        mkdir build
+        cd build
+        cmake ../src -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 17 2022" -A x64
+
+    - name: Configure build (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        mkdir build
+        cd build
+        cmake ../src -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        cd build
+        cmake --build . --config Release --parallel
+
+    - name: Build (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        cd build
+        make -j$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+
+    - name: Package (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        cd build
+        make install DESTDIR=AppDir
+        wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+        wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+        chmod +x linuxdeploy*.AppImage
+        ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin qt --output appimage
+        mv SpeedCrunch*.AppImage ../SpeedCrunch-Linux-x86_64.AppImage
+
+    - name: Package (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        mkdir package
+        Copy-Item build/Release/speedcrunch.exe package/
+        & $env:Qt5_DIR/bin/windeployqt.exe package/speedcrunch.exe
+        Copy-Item "$env:VCToolsRedistDir/x64/Microsoft.VC*.CRT/*.dll" package/ -ErrorAction SilentlyContinue
+        Compress-Archive -Path package/* -DestinationPath SpeedCrunch-Windows-x64.zip
+
+    - name: Package (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        cd build
+        make install
+        macdeployqt SpeedCrunch.app -dmg
+        mv SpeedCrunch.dmg ../SpeedCrunch-macOS.dmg
+
+    - name: Upload to Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ${{ matrix.artifact_name }}
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
