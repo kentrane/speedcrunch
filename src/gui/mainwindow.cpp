@@ -152,6 +152,10 @@ void MainWindow::createActions()
     m_actions.settingsBehaviorAutoResultToClipboard = new QAction(this);
     m_actions.settingsBehaviorComplexNumbers = new QAction(this);
     m_actions.settingsDisplayFont = new QAction(this);
+    m_actions.settingsDisplayFontSizeSmall = new QAction(this);
+    m_actions.settingsDisplayFontSizeMedium = new QAction(this);
+    m_actions.settingsDisplayFontSizeLarge = new QAction(this);
+    m_actions.settingsDisplayFontSizeExtraLarge = new QAction(this);
     m_actions.settingsLanguage = new QAction(this);
     m_actions.settingsRadixCharComma = new QAction(this);
     m_actions.settingsRadixCharDefault = new QAction(this);
@@ -364,6 +368,10 @@ void MainWindow::setActionsText()
     m_actions.settingsResultFormatCartesian->setText(MainWindow::tr("&Cartesian"));
     m_actions.settingsResultFormatPolar->setText(MainWindow::tr("&Polar"));
     m_actions.settingsDisplayFont->setText(MainWindow::tr("&Font..."));
+    m_actions.settingsDisplayFontSizeSmall->setText(MainWindow::tr("Small (10pt)"));
+    m_actions.settingsDisplayFontSizeMedium->setText(MainWindow::tr("Medium (12pt)"));
+    m_actions.settingsDisplayFontSizeLarge->setText(MainWindow::tr("Large (14pt)"));
+    m_actions.settingsDisplayFontSizeExtraLarge->setText(MainWindow::tr("Extra Large (18pt)"));
     m_actions.settingsLanguage->setText(MainWindow::tr("&Language..."));
 
     m_actions.helpManual->setText(MainWindow::tr("User &Manual"));
@@ -573,6 +581,11 @@ void MainWindow::createMenus()
     for (auto& action : schemes)
         m_menus.colorScheme->addAction(action);
     m_menus.display->addAction(m_actions.settingsDisplayFont);
+    m_menus.fontSize = m_menus.display->addMenu("");
+    m_menus.fontSize->addAction(m_actions.settingsDisplayFontSizeSmall);
+    m_menus.fontSize->addAction(m_actions.settingsDisplayFontSizeMedium);
+    m_menus.fontSize->addAction(m_actions.settingsDisplayFontSizeLarge);
+    m_menus.fontSize->addAction(m_actions.settingsDisplayFontSizeExtraLarge);
 
     m_menus.settings->addAction(m_actions.settingsLanguage);
 
@@ -609,6 +622,7 @@ void MainWindow::setMenusText()
     m_menus.behavior->setTitle(MainWindow::tr("&Behavior"));
     m_menus.display->setTitle(MainWindow::tr("&Display"));
     m_menus.colorScheme->setTitle(MainWindow::tr("Color Scheme"));
+    m_menus.fontSize->setTitle(MainWindow::tr("Font Size"));
     m_menus.help->setTitle(MainWindow::tr("&Help"));
     m_menus.digitGrouping->setTitle(MainWindow::tr("Digit Grouping"));
 }
@@ -952,6 +966,10 @@ void MainWindow::createFixedConnections()
     connect(this, &MainWindow::syntaxHighlightingChanged, m_widgets.editor, &Editor::rehighlight);
 
     connect(m_actions.settingsDisplayFont, &QAction::triggered, this, &MainWindow::showFontDialog);
+    connect(m_actions.settingsDisplayFontSizeSmall, &QAction::triggered, this, &MainWindow::setFontSizeSmall);
+    connect(m_actions.settingsDisplayFontSizeMedium, &QAction::triggered, this, &MainWindow::setFontSizeMedium);
+    connect(m_actions.settingsDisplayFontSizeLarge, &QAction::triggered, this, &MainWindow::setFontSizeLarge);
+    connect(m_actions.settingsDisplayFontSizeExtraLarge, &QAction::triggered, this, &MainWindow::setFontSizeExtraLarge);
 
     const auto schemes = m_actions.settingsDisplayColorSchemes;
     for (auto& action : schemes) // TODO: Use Qt 5.7's qAsConst();
@@ -1711,6 +1729,38 @@ void MainWindow::showFontDialog()
     QFont f = QFontDialog::getFont(&ok, m_widgets.display->font(), this, tr("Display font"));
     if (!ok)
         return;
+    m_widgets.display->setFont(f);
+    m_widgets.editor->setFont(f);
+}
+
+void MainWindow::setFontSizeSmall()
+{
+    QFont f = m_widgets.display->font();
+    f.setPointSize(10);
+    m_widgets.display->setFont(f);
+    m_widgets.editor->setFont(f);
+}
+
+void MainWindow::setFontSizeMedium()
+{
+    QFont f = m_widgets.display->font();
+    f.setPointSize(12);
+    m_widgets.display->setFont(f);
+    m_widgets.editor->setFont(f);
+}
+
+void MainWindow::setFontSizeLarge()
+{
+    QFont f = m_widgets.display->font();
+    f.setPointSize(14);
+    m_widgets.display->setFont(f);
+    m_widgets.editor->setFont(f);
+}
+
+void MainWindow::setFontSizeExtraLarge()
+{
+    QFont f = m_widgets.display->font();
+    f.setPointSize(18);
     m_widgets.display->setFont(f);
     m_widgets.editor->setFont(f);
 }
