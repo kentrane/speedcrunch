@@ -1,4 +1,9 @@
 # SpeedCrunch
+
+[![Build Status](https://github.com/kentrane/speedcrunch/workflows/Build%20SpeedCrunch/badge.svg)](https://github.com/kentrane/speedcrunch/actions)
+[![Release](https://img.shields.io/github/v/release/kentrane/speedcrunch)](https://github.com/kentrane/speedcrunch/releases)
+[![License](https://img.shields.io/badge/license-GPL%20v2-blue.svg)](LICENSE)
+
 SpeedCrunch is a high-precision scientific calculator. It features a syntax-highlighted
 scrollable display and is designed to be fully used via keyboard. Some distinctive
 features are auto-completion of functions and variables, a formula book, and quick
@@ -7,12 +12,19 @@ and Linux in a number of languages.
 
 ![capture.png](https://bitbucket.org/repo/dR7BnG/images/3654665019-capture.png)
 
+## Download
+
+Pre-built binaries are automatically generated for each release and available on the [Releases page](https://github.com/kentrane/speedcrunch/releases):
+- **Windows** - Portable ZIP archive
+- **macOS** - DMG disk image
+- **Linux** - AppImage (universal binary)
+
 ## Building
 To build SpeedCrunch, you need:
 
-- A C++11-capable compiler (e.g. Microsoft Visual C++ 2013 or later, GCC 4.8 or later)
+- A C++17-capable compiler (e.g. Microsoft Visual C++ 2017 or later, GCC 7 or later, Clang 5 or later)
 - [Qt](http://qt.io) 5.2 or later
-- [CMake](http://cmake.org) 3.1 or later
+- [CMake](http://cmake.org) 3.16 or later
 
 To build SpeedCrunch in a dedicated build directory and install it, run the following
 commands from the root of the source directory:
