@@ -36,7 +36,7 @@ BookDock::BookDock(QWidget* parent)
     m_browser = new TextBrowser(this);
     m_browser->setLineWrapMode(QTextEdit::NoWrap);
 
-    connect(m_browser, SIGNAL(anchorClicked(const QUrl&)), SLOT(handleAnchorClick(const QUrl&)));
+    connect(m_browser, &QTextBrowser::anchorClicked, this, &BookDock::handleAnchorClick);
 
     bookLayout->addWidget(m_browser);
     widget->setLayout(bookLayout);

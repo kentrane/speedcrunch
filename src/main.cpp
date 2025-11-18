@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
     MainWindow window;
     window.show();
 
-    application.connect(&application, SIGNAL(lastWindowClosed()), &application, SLOT(quit()));
+    application.connect(&application, &QApplication::lastWindowClosed, &application, &QApplication::quit);
 
     return application.exec();
 }

@@ -183,8 +183,8 @@ private slots:
     void wrapSelection();
 
 protected:
-    virtual void closeEvent(QCloseEvent*);
-    virtual bool eventFilter(QObject*, QEvent*);
+    void closeEvent(QCloseEvent*) override;
+    bool eventFilter(QObject*, QEvent*) override;
 
 private:
     Q_DISABLE_COPY(MainWindow)

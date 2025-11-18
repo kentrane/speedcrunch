@@ -42,7 +42,7 @@ ConstantsWidget::ConstantsWidget(QWidget* parent)
     m_category->setEditable(false);
     m_category->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-    connect(m_category, SIGNAL(activated(int)), SLOT(filter()));
+    connect(m_category, qOverload<int>(&QComboBox::activated), this, &ConstantsWidget::filter);
 
     QWidget* categoryBox = new QWidget(this);
     QHBoxLayout* categoryLayout = new QHBoxLayout;
@@ -56,7 +56,7 @@ ConstantsWidget::ConstantsWidget(QWidget* parent)
     m_filter = new QLineEdit(this);
     m_filter->setMinimumWidth(fontMetrics().horizontalAdvance('X') * 10);
 
-    connect(m_filter, SIGNAL(textChanged(const QString &)), SLOT(triggerFilter()));
+    connect(m_filter, &QLineEdit::textChanged, this, &ConstantsWidget::triggerFilter);
 
     QWidget* searchBox = new QWidget(this);
     QHBoxLayout* searchLayout = new QHBoxLayout;
@@ -78,7 +78,7 @@ ConstantsWidget::ConstantsWidget(QWidget* parent)
     m_list->setAlternatingRowColors(true);
     m_list->setCursor(QCursor(Qt::PointingHandCursor));
 
-    connect(m_list, SIGNAL(itemActivated(QTreeWidgetItem*, int)), SLOT(handleItem(QTreeWidgetItem*)));
+    connect(m_list, &QTreeWidget::itemActivated, this, qOverload<QTreeWidgetItem*>(&ConstantsWidget::handleItem));
 
     QVBoxLayout* layout = new QVBoxLayout;
     setLayout(layout);
@@ -90,7 +90,7 @@ ConstantsWidget::ConstantsWidget(QWidget* parent)
     m_filterTimer = new QTimer(this);
     m_filterTimer->setInterval(500);
     m_filterTimer->setSingleShot(true);
-    connect(m_filterTimer, SIGNAL(timeout()), SLOT(filter()));
+    connect(m_filterTimer, &QTimer::timeout, this, &ConstantsWidget::filter);
 
     m_noMatchLabel = new QLabel(this);
     m_noMatchLabel->setAlignment(Qt::AlignCenter);

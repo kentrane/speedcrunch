@@ -58,7 +58,7 @@
 #include <QClipboard>
 #include <QCloseEvent>
 #include <QDesktopServices>
-#include <QDesktopWidget>
+#include <QScreen>
 #include <QFileDialog>
 #include <QFont>
 #include <QFontDialog>
@@ -632,11 +632,11 @@ void MainWindow::createStatusBar()
     m_status.angleUnit->addAction(m_actions.settingsAngleUnitGradian);
 
     m_status.resultFormat->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(m_status.resultFormat, SIGNAL(customContextMenuRequested(const QPoint&)),
-        SLOT(showResultFormatContextMenu(const QPoint&)));
+    connect(m_status.resultFormat, &QPushButton::customContextMenuRequested,
+        this, &MainWindow::showResultFormatContextMenu);
 
-    connect(m_status.angleUnit, SIGNAL(clicked()), SLOT(cycleAngleUnits()));
-    connect(m_status.resultFormat, SIGNAL(clicked()), SLOT(cycleResultFormats()));
+    connect(m_status.angleUnit, &QPushButton::clicked, this, &MainWindow::cycleAngleUnits);
+    connect(m_status.resultFormat, &QPushButton::clicked, this, &MainWindow::cycleResultFormats);
 
     bar->addWidget(m_status.angleUnit);
     bar->addWidget(m_status.resultFormat);
@@ -680,7 +680,7 @@ void MainWindow::createBitField() {
     m_layouts.root->addWidget(m_widgets.bitField);
     m_widgets.bitField->show();
     m_widgets.display->scrollToBottom();
-    connect(m_widgets.bitField, SIGNAL(bitsChanged(const QString&)), SLOT(handleBitsChanged(const QString&)));
+    connect(m_widgets.bitField, &BitFieldWidget::bitsChanged, this, &MainWindow::handleBitsChanged);
     m_settings->bitfieldVisible = true;
 }
 
@@ -689,8 +689,8 @@ void MainWindow::createKeypad()
     m_widgets.keypad = new Keypad(m_widgets.root);
     m_widgets.keypad->setFocusPolicy(Qt::NoFocus);
 
-    connect(m_widgets.keypad, SIGNAL(buttonPressed(Keypad::Button)), SLOT(handleKeypadButtonPress(Keypad::Button)));
-    connect(this, SIGNAL(radixCharacterChanged()), m_widgets.keypad, SLOT(handleRadixCharacterChange()));
+    connect(m_widgets.keypad, &Keypad::buttonPressed, this, &MainWindow::handleKeypadButtonPress);
+    connect(this, &MainWindow::radixCharacterChanged, m_widgets.keypad, &Keypad::handleRadixCharacterChange);
 
     m_layouts.keypad = new QHBoxLayout();
     m_layouts.keypad->addStretch();
@@ -710,8 +710,8 @@ void MainWindow::createBookDock(bool)
     m_docks.book->setAllowedAreas(Qt::AllDockWidgetAreas);
 
     connect(m_docks.book,
-            SIGNAL(expressionSelected(const QString&)),
-            SLOT(insertTextIntoEditor(const QString&)));
+            &BookDock::expressionSelected,
+            this, &MainWindow::insertTextIntoEditor);
 
     // No focus for this dock.
     addTabifiedDock(m_docks.book, false);
@@ -830,134 +830,134 @@ void MainWindow::deleteDock(QDockWidget* dock)
 
 void MainWindow::createFixedConnections()
 {
-    connect(m_actions.sessionExportHtml, SIGNAL(triggered()), SLOT(exportHtml()));
-    connect(m_actions.sessionExportPlainText, SIGNAL(triggered()), SLOT(exportPlainText()));
-    connect(m_actions.sessionImport, SIGNAL(triggered()), SLOT(showSessionImportDialog()));
-    connect(m_actions.sessionLoad, SIGNAL(triggered()), SLOT(showSessionLoadDialog()));
-    connect(m_actions.sessionQuit, SIGNAL(triggered()), SLOT(close()));
-    connect(m_actions.sessionSave, SIGNAL(triggered()), SLOT(saveSessionDialog()));
+    connect(m_actions.sessionExportHtml, &QAction::triggered, this, &MainWindow::exportHtml);
+    connect(m_actions.sessionExportPlainText, &QAction::triggered, this, &MainWindow::exportPlainText);
+    connect(m_actions.sessionImport, &QAction::triggered, this, &MainWindow::showSessionImportDialog);
+    connect(m_actions.sessionLoad, &QAction::triggered, this, &MainWindow::showSessionLoadDialog);
+    connect(m_actions.sessionQuit, &QAction::triggered, this, &MainWindow::close);
+    connect(m_actions.sessionSave, &QAction::triggered, this, &MainWindow::saveSessionDialog);
 
-    connect(m_actions.editClearExpression, SIGNAL(triggered()), SLOT(clearEditorAndBitfield()));
-    connect(m_actions.editClearHistory, SIGNAL(triggered()), SLOT(clearHistory()));
-    connect(m_actions.editCopyLastResult, SIGNAL(triggered()), SLOT(copyResultToClipboard()));
-    connect(m_actions.editCopy, SIGNAL(triggered()), SLOT(copy()));
-    connect(m_actions.editPaste, SIGNAL(triggered()), m_widgets.editor, SLOT(paste()));
-    connect(m_actions.editSelectExpression, SIGNAL(triggered()), SLOT(selectEditorExpression()));
-    connect(m_actions.editWrapSelection, SIGNAL(triggered()), SLOT(wrapSelection()));
+    connect(m_actions.editClearExpression, &QAction::triggered, this, &MainWindow::clearEditorAndBitfield);
+    connect(m_actions.editClearHistory, &QAction::triggered, this, &MainWindow::clearHistory);
+    connect(m_actions.editCopyLastResult, &QAction::triggered, this, &MainWindow::copyResultToClipboard);
+    connect(m_actions.editCopy, &QAction::triggered, this, &MainWindow::copy);
+    connect(m_actions.editPaste, &QAction::triggered, m_widgets.editor, &Editor::paste);
+    connect(m_actions.editSelectExpression, &QAction::triggered, this, &MainWindow::selectEditorExpression);
+    connect(m_actions.editWrapSelection, &QAction::triggered, this, &MainWindow::wrapSelection);
 
-    connect(m_actions.viewFullScreenMode, SIGNAL(toggled(bool)), SLOT(setFullScreenEnabled(bool)));
-    connect(m_actions.viewKeypad, SIGNAL(toggled(bool)), SLOT(setKeypadVisible(bool)));
-    connect(m_actions.viewStatusBar, SIGNAL(toggled(bool)), SLOT(setStatusBarVisible(bool)));
-    connect(m_actions.viewBitfield, SIGNAL(toggled(bool)), SLOT(setBitfieldVisible(bool)));
+    connect(m_actions.viewFullScreenMode, &QAction::toggled, this, &MainWindow::setFullScreenEnabled);
+    connect(m_actions.viewKeypad, &QAction::toggled, this, &MainWindow::setKeypadVisible);
+    connect(m_actions.viewStatusBar, &QAction::toggled, this, &MainWindow::setStatusBarVisible);
+    connect(m_actions.viewBitfield, &QAction::toggled, this, &MainWindow::setBitfieldVisible);
 
-    connect(m_actions.viewConstants, SIGNAL(triggered(bool)), SLOT(setConstantsDockVisible(bool)));
-    connect(m_actions.viewFunctions, SIGNAL(triggered(bool)), SLOT(setFunctionsDockVisible(bool)));
-    connect(m_actions.viewHistory, SIGNAL(triggered(bool)), SLOT(setHistoryDockVisible(bool)));
-    connect(m_actions.viewFormulaBook, SIGNAL(triggered(bool)), SLOT(setFormulaBookDockVisible(bool)));
-    connect(m_actions.viewVariables, SIGNAL(triggered(bool)), SLOT(setVariablesDockVisible(bool)));
-    connect(m_actions.viewUserFunctions, SIGNAL(triggered(bool)), SLOT(setUserFunctionsDockVisible(bool)));
+    connect(m_actions.viewConstants, &QAction::triggered, this, qOverload<bool>(&MainWindow::setConstantsDockVisible));
+    connect(m_actions.viewFunctions, &QAction::triggered, this, qOverload<bool>(&MainWindow::setFunctionsDockVisible));
+    connect(m_actions.viewHistory, &QAction::triggered, this, qOverload<bool>(&MainWindow::setHistoryDockVisible));
+    connect(m_actions.viewFormulaBook, &QAction::triggered, this, qOverload<bool>(&MainWindow::setFormulaBookDockVisible));
+    connect(m_actions.viewVariables, &QAction::triggered, this, qOverload<bool>(&MainWindow::setVariablesDockVisible));
+    connect(m_actions.viewUserFunctions, &QAction::triggered, this, qOverload<bool>(&MainWindow::setUserFunctionsDockVisible));
 
-    connect(m_actions.settingsAngleUnitDegree, SIGNAL(triggered()), SLOT(setAngleModeDegree()));
-    connect(m_actions.settingsAngleUnitRadian, SIGNAL(triggered()), SLOT(setAngleModeRadian()));
-    connect(m_actions.settingsAngleUnitGradian, SIGNAL(triggered()), SLOT(setAngleModeGradian()));
-    connect(m_actions.settingsAngleUnitCycle, SIGNAL(triggered()), SLOT(cycleAngleUnits()));
+    connect(m_actions.settingsAngleUnitDegree, &QAction::triggered, this, &MainWindow::setAngleModeDegree);
+    connect(m_actions.settingsAngleUnitRadian, &QAction::triggered, this, &MainWindow::setAngleModeRadian);
+    connect(m_actions.settingsAngleUnitGradian, &QAction::triggered, this, &MainWindow::setAngleModeGradian);
+    connect(m_actions.settingsAngleUnitCycle, &QAction::triggered, this, &MainWindow::cycleAngleUnits);
 
-    connect(m_actions.settingsBehaviorAlwaysOnTop, SIGNAL(toggled(bool)), SLOT(setAlwaysOnTopEnabled(bool)));
-    connect(m_actions.settingsBehaviorAutoCompletion, SIGNAL(toggled(bool)), SLOT(setAutoCompletionEnabled(bool)));
-    connect(m_actions.settingsBehaviorAutoAns, SIGNAL(toggled(bool)), SLOT(setAutoAnsEnabled(bool)));
-    connect(m_actions.settingsBehaviorPartialResults, SIGNAL(toggled(bool)), SLOT(setAutoCalcEnabled(bool)));
-    connect(m_actions.settingsBehaviorSaveSessionOnExit, SIGNAL(toggled(bool)), SLOT(setSessionSaveEnabled(bool)));
-    connect(m_actions.settingsBehaviorSaveWindowPositionOnExit, SIGNAL(toggled(bool)), SLOT(setWindowPositionSaveEnabled(bool)));
-    connect(m_actions.settingsBehaviorSyntaxHighlighting, SIGNAL(toggled(bool)), SLOT(setSyntaxHighlightingEnabled(bool)));
-    connect(m_actionGroups.digitGrouping, SIGNAL(triggered(QAction*)), SLOT(setDigitGrouping(QAction*)));
-    connect(m_actions.settingsBehaviorLeaveLastExpression, SIGNAL(toggled(bool)), SLOT(setLeaveLastExpressionEnabled(bool)));
-    connect(m_actions.settingsBehaviorAutoResultToClipboard, SIGNAL(toggled(bool)), SLOT(setAutoResultToClipboardEnabled(bool)));
-    connect(m_actions.settingsBehaviorComplexNumbers, SIGNAL(toggled(bool)), SLOT(setComplexNumbers(bool)));
+    connect(m_actions.settingsBehaviorAlwaysOnTop, &QAction::toggled, this, &MainWindow::setAlwaysOnTopEnabled);
+    connect(m_actions.settingsBehaviorAutoCompletion, &QAction::toggled, this, &MainWindow::setAutoCompletionEnabled);
+    connect(m_actions.settingsBehaviorAutoAns, &QAction::toggled, this, &MainWindow::setAutoAnsEnabled);
+    connect(m_actions.settingsBehaviorPartialResults, &QAction::toggled, this, &MainWindow::setAutoCalcEnabled);
+    connect(m_actions.settingsBehaviorSaveSessionOnExit, &QAction::toggled, this, &MainWindow::setSessionSaveEnabled);
+    connect(m_actions.settingsBehaviorSaveWindowPositionOnExit, &QAction::toggled, this, &MainWindow::setWindowPositionSaveEnabled);
+    connect(m_actions.settingsBehaviorSyntaxHighlighting, &QAction::toggled, this, &MainWindow::setSyntaxHighlightingEnabled);
+    connect(m_actionGroups.digitGrouping, &QActionGroup::triggered, this, &MainWindow::setDigitGrouping);
+    connect(m_actions.settingsBehaviorLeaveLastExpression, &QAction::toggled, this, &MainWindow::setLeaveLastExpressionEnabled);
+    connect(m_actions.settingsBehaviorAutoResultToClipboard, &QAction::toggled, this, &MainWindow::setAutoResultToClipboardEnabled);
+    connect(m_actions.settingsBehaviorComplexNumbers, &QAction::toggled, this, &MainWindow::setComplexNumbers);
 
-    connect(m_actions.settingsRadixCharComma, SIGNAL(triggered()), SLOT(setRadixCharacterComma()));
-    connect(m_actions.settingsRadixCharDefault, SIGNAL(triggered()), SLOT(setRadixCharacterAutomatic()));
-    connect(m_actions.settingsRadixCharDot, SIGNAL(triggered()), SLOT(setRadixCharacterDot()));
-    connect(m_actions.settingsRadixCharBoth, SIGNAL(triggered()), SLOT(setRadixCharacterBoth()));
+    connect(m_actions.settingsRadixCharComma, &QAction::triggered, this, &MainWindow::setRadixCharacterComma);
+    connect(m_actions.settingsRadixCharDefault, &QAction::triggered, this, &MainWindow::setRadixCharacterAutomatic);
+    connect(m_actions.settingsRadixCharDot, &QAction::triggered, this, &MainWindow::setRadixCharacterDot);
+    connect(m_actions.settingsRadixCharBoth, &QAction::triggered, this, &MainWindow::setRadixCharacterBoth);
 
     connect(m_actions.settingsResultFormat0Digits, &QAction::triggered, [this]() { this->setResultPrecision(0); });
-    connect(m_actions.settingsResultFormat15Digits, SIGNAL(triggered()), SLOT(setResultPrecision15Digits()));
-    connect(m_actions.settingsResultFormat2Digits, SIGNAL(triggered()), SLOT(setResultPrecision2Digits()));
-    connect(m_actions.settingsResultFormat3Digits, SIGNAL(triggered()), SLOT(setResultPrecision3Digits()));
-    connect(m_actions.settingsResultFormat50Digits, SIGNAL(triggered()), SLOT(setResultPrecision50Digits()));
-    connect(m_actions.settingsResultFormat8Digits, SIGNAL(triggered()), SLOT(setResultPrecision8Digits()));
-    connect(m_actions.settingsResultFormatAutoPrecision, SIGNAL(triggered()), SLOT(setResultPrecisionAutomatic()));
-    connect(m_actions.settingsResultFormatBinary, SIGNAL(triggered()), SLOT(setResultFormatBinary()));
-    connect(m_actions.settingsResultFormatCartesian, SIGNAL(triggered()), SLOT(setResultFormatCartesian()));
-    connect(m_actions.settingsResultFormatEngineering, SIGNAL(triggered()), SLOT(setResultFormatEngineering()));
-    connect(m_actions.settingsResultFormatFixed, SIGNAL(triggered()), SLOT(setResultFormatFixed()));
-    connect(m_actions.settingsResultFormatGeneral, SIGNAL(triggered()), SLOT(setResultFormatGeneral()));
-    connect(m_actions.settingsResultFormatHexadecimal, SIGNAL(triggered()), SLOT(setResultFormatHexadecimal()));
-    connect(m_actions.settingsResultFormatOctal, SIGNAL(triggered()), SLOT(setResultFormatOctal()));
-    connect(m_actions.settingsResultFormatPolar, SIGNAL(triggered()), SLOT(setResultFormatPolar()));
-    connect(m_actions.settingsResultFormatSexagesimal, SIGNAL(triggered()), SLOT(setResultFormatSexagesimal()));
-    connect(m_actions.settingsResultFormatScientific, SIGNAL(triggered()), SLOT(setResultFormatScientific()));
+    connect(m_actions.settingsResultFormat15Digits, &QAction::triggered, this, &MainWindow::setResultPrecision15Digits);
+    connect(m_actions.settingsResultFormat2Digits, &QAction::triggered, this, &MainWindow::setResultPrecision2Digits);
+    connect(m_actions.settingsResultFormat3Digits, &QAction::triggered, this, &MainWindow::setResultPrecision3Digits);
+    connect(m_actions.settingsResultFormat50Digits, &QAction::triggered, this, &MainWindow::setResultPrecision50Digits);
+    connect(m_actions.settingsResultFormat8Digits, &QAction::triggered, this, &MainWindow::setResultPrecision8Digits);
+    connect(m_actions.settingsResultFormatAutoPrecision, &QAction::triggered, this, &MainWindow::setResultPrecisionAutomatic);
+    connect(m_actions.settingsResultFormatBinary, &QAction::triggered, this, &MainWindow::setResultFormatBinary);
+    connect(m_actions.settingsResultFormatCartesian, &QAction::triggered, this, &MainWindow::setResultFormatCartesian);
+    connect(m_actions.settingsResultFormatEngineering, &QAction::triggered, this, &MainWindow::setResultFormatEngineering);
+    connect(m_actions.settingsResultFormatFixed, &QAction::triggered, this, &MainWindow::setResultFormatFixed);
+    connect(m_actions.settingsResultFormatGeneral, &QAction::triggered, this, &MainWindow::setResultFormatGeneral);
+    connect(m_actions.settingsResultFormatHexadecimal, &QAction::triggered, this, &MainWindow::setResultFormatHexadecimal);
+    connect(m_actions.settingsResultFormatOctal, &QAction::triggered, this, &MainWindow::setResultFormatOctal);
+    connect(m_actions.settingsResultFormatPolar, &QAction::triggered, this, &MainWindow::setResultFormatPolar);
+    connect(m_actions.settingsResultFormatSexagesimal, &QAction::triggered, this, &MainWindow::setResultFormatSexagesimal);
+    connect(m_actions.settingsResultFormatScientific, &QAction::triggered, this, &MainWindow::setResultFormatScientific);
 
-    connect(m_actions.settingsLanguage, SIGNAL(triggered()), SLOT(showLanguageChooserDialog()));
+    connect(m_actions.settingsLanguage, &QAction::triggered, this, &MainWindow::showLanguageChooserDialog);
 
-    connect(m_actions.helpManual, SIGNAL(triggered()), SLOT(showManualWindow()));
-    connect(m_actions.contextHelp, SIGNAL(triggered()), SLOT(showContextHelp()));
-    connect(m_actions.helpUpdates, SIGNAL(triggered()), SLOT(openUpdatesURL()));
-    connect(m_actions.helpFeedback, SIGNAL(triggered()), SLOT(openFeedbackURL()));
-    connect(m_actions.helpCommunity, SIGNAL(triggered()), SLOT(openCommunityURL()));
-    connect(m_actions.helpNews, SIGNAL(triggered()), SLOT(openNewsURL()));
-    connect(m_actions.helpDonate, SIGNAL(triggered()), SLOT(openDonateURL()));
-    connect(m_actions.helpAbout, SIGNAL(triggered()), SLOT(showAboutDialog()));
+    connect(m_actions.helpManual, &QAction::triggered, this, &MainWindow::showManualWindow);
+    connect(m_actions.contextHelp, &QAction::triggered, this, &MainWindow::showContextHelp);
+    connect(m_actions.helpUpdates, &QAction::triggered, this, &MainWindow::openUpdatesURL);
+    connect(m_actions.helpFeedback, &QAction::triggered, this, &MainWindow::openFeedbackURL);
+    connect(m_actions.helpCommunity, &QAction::triggered, this, &MainWindow::openCommunityURL);
+    connect(m_actions.helpNews, &QAction::triggered, this, &MainWindow::openNewsURL);
+    connect(m_actions.helpDonate, &QAction::triggered, this, &MainWindow::openDonateURL);
+    connect(m_actions.helpAbout, &QAction::triggered, this, &MainWindow::showAboutDialog);
 
-    connect(m_widgets.editor, SIGNAL(autoCalcDisabled()), SLOT(hideStateLabel()));
-    connect(m_widgets.editor, SIGNAL(autoCalcMessageAvailable(const QString&)), SLOT(handleAutoCalcMessageAvailable(const QString&)));
-    connect(m_widgets.editor, SIGNAL(autoCalcQuantityAvailable(const Quantity&)), SLOT(handleAutoCalcQuantityAvailable(const Quantity&)));
-    connect(m_widgets.editor, SIGNAL(returnPressed()), SLOT(evaluateEditorExpression()));
-    connect(m_widgets.editor, SIGNAL(shiftDownPressed()), SLOT(decreaseDisplayFontPointSize()));
-    connect(m_widgets.editor, SIGNAL(shiftUpPressed()), SLOT(increaseDisplayFontPointSize()));
-    connect(m_widgets.editor, SIGNAL(controlPageUpPressed()), m_widgets.display, SLOT(scrollToTop()));
-    connect(m_widgets.editor, SIGNAL(controlPageDownPressed()), m_widgets.display, SLOT(scrollToBottom()));
-    connect(m_widgets.editor, SIGNAL(shiftPageUpPressed()), m_widgets.display, SLOT(scrollLineUp()));
-    connect(m_widgets.editor, SIGNAL(shiftPageDownPressed()), m_widgets.display, SLOT(scrollLineDown()));
-    connect(m_widgets.editor, SIGNAL(pageUpPressed()), m_widgets.display, SLOT(scrollPageUp()));
-    connect(m_widgets.editor, SIGNAL(pageDownPressed()), m_widgets.display, SLOT(scrollPageDown()));
-    connect(m_widgets.editor, SIGNAL(textChanged()), SLOT(handleEditorTextChange()));
-    connect(m_widgets.editor, SIGNAL(copyAvailable(bool)), SLOT(handleCopyAvailable(bool)));
-    connect(m_widgets.editor, SIGNAL(copySequencePressed()), SLOT(copy()));
-    connect(m_widgets.editor, SIGNAL(selectionChanged()), SLOT(handleEditorSelectionChange()));
-    connect(this, SIGNAL(historyChanged()), m_widgets.editor, SLOT(updateHistory()));
+    connect(m_widgets.editor, &Editor::autoCalcDisabled, this, &MainWindow::hideStateLabel);
+    connect(m_widgets.editor, &Editor::autoCalcMessageAvailable, this, &MainWindow::handleAutoCalcMessageAvailable);
+    connect(m_widgets.editor, &Editor::autoCalcQuantityAvailable, this, &MainWindow::handleAutoCalcQuantityAvailable);
+    connect(m_widgets.editor, &Editor::returnPressed, this, &MainWindow::evaluateEditorExpression);
+    connect(m_widgets.editor, &Editor::shiftDownPressed, this, &MainWindow::decreaseDisplayFontPointSize);
+    connect(m_widgets.editor, &Editor::shiftUpPressed, this, &MainWindow::increaseDisplayFontPointSize);
+    connect(m_widgets.editor, &Editor::controlPageUpPressed, m_widgets.display, &ResultDisplay::scrollToTop);
+    connect(m_widgets.editor, &Editor::controlPageDownPressed, m_widgets.display, &ResultDisplay::scrollToBottom);
+    connect(m_widgets.editor, &Editor::shiftPageUpPressed, m_widgets.display, &ResultDisplay::scrollLineUp);
+    connect(m_widgets.editor, &Editor::shiftPageDownPressed, m_widgets.display, &ResultDisplay::scrollLineDown);
+    connect(m_widgets.editor, &Editor::pageUpPressed, m_widgets.display, &ResultDisplay::scrollPageUp);
+    connect(m_widgets.editor, &Editor::pageDownPressed, m_widgets.display, &ResultDisplay::scrollPageDown);
+    connect(m_widgets.editor, &Editor::textChanged, this, &MainWindow::handleEditorTextChange);
+    connect(m_widgets.editor, &Editor::copyAvailable, this, &MainWindow::handleCopyAvailable);
+    connect(m_widgets.editor, &Editor::copySequencePressed, this, &MainWindow::copy);
+    connect(m_widgets.editor, &Editor::selectionChanged, this, &MainWindow::handleEditorSelectionChange);
+    connect(this, &MainWindow::historyChanged, m_widgets.editor, &Editor::updateHistory);
 
-    connect(m_widgets.display, SIGNAL(copyAvailable(bool)), SLOT(handleCopyAvailable(bool)));
-    connect(m_widgets.display, SIGNAL(expressionSelected(const QString&)), SLOT(insertTextIntoEditor(const QString&)));
-    connect(m_widgets.display, SIGNAL(selectionChanged()), SLOT(handleDisplaySelectionChange()));
-    connect(m_widgets.display, SIGNAL(shiftWheelUp()), SLOT(increaseDisplayFontPointSize()));
-    connect(m_widgets.display, SIGNAL(shiftWheelDown()), SLOT(decreaseDisplayFontPointSize()));
-    connect(m_widgets.display, SIGNAL(controlWheelUp()), SLOT(increaseDisplayFontPointSize()));
-    connect(m_widgets.display, SIGNAL(controlWheelDown()), SLOT(decreaseDisplayFontPointSize()));
-    connect(m_widgets.display, SIGNAL(shiftControlWheelDown()), SLOT(decreaseOpacity()));
-    connect(m_widgets.display, SIGNAL(shiftControlWheelUp()), SLOT(increaseOpacity()));
-    connect(this, SIGNAL(historyChanged()), m_widgets.display, SLOT(refresh()));
+    connect(m_widgets.display, &ResultDisplay::copyAvailable, this, &MainWindow::handleCopyAvailable);
+    connect(m_widgets.display, &ResultDisplay::expressionSelected, this, &MainWindow::insertTextIntoEditor);
+    connect(m_widgets.display, &ResultDisplay::selectionChanged, this, &MainWindow::handleDisplaySelectionChange);
+    connect(m_widgets.display, &ResultDisplay::shiftWheelUp, this, &MainWindow::increaseDisplayFontPointSize);
+    connect(m_widgets.display, &ResultDisplay::shiftWheelDown, this, &MainWindow::decreaseDisplayFontPointSize);
+    connect(m_widgets.display, &ResultDisplay::controlWheelUp, this, &MainWindow::increaseDisplayFontPointSize);
+    connect(m_widgets.display, &ResultDisplay::controlWheelDown, this, &MainWindow::decreaseDisplayFontPointSize);
+    connect(m_widgets.display, &ResultDisplay::shiftControlWheelDown, this, &MainWindow::decreaseOpacity);
+    connect(m_widgets.display, &ResultDisplay::shiftControlWheelUp, this, &MainWindow::increaseOpacity);
+    connect(this, &MainWindow::historyChanged, m_widgets.display, &ResultDisplay::refresh);
 
-    connect(this, SIGNAL(radixCharacterChanged()), m_widgets.display, SLOT(refresh()));
-    connect(this, SIGNAL(radixCharacterChanged()), m_widgets.editor, SLOT(refreshAutoCalc()));
-    connect(this, SIGNAL(resultFormatChanged()), m_widgets.display, SLOT(refresh()));
-    connect(this, SIGNAL(resultFormatChanged()), m_widgets.editor, SLOT(refreshAutoCalc()));
-    connect(this, SIGNAL(resultPrecisionChanged()), m_widgets.display, SLOT(refresh()));
-    connect(this, SIGNAL(resultPrecisionChanged()), m_widgets.editor, SLOT(refreshAutoCalc()));
-    connect(this, SIGNAL(colorSchemeChanged()), m_widgets.display, SLOT(rehighlight()));
-    connect(this, SIGNAL(colorSchemeChanged()), m_widgets.editor, SLOT(rehighlight()));
+    connect(this, &MainWindow::radixCharacterChanged, m_widgets.display, &ResultDisplay::refresh);
+    connect(this, &MainWindow::radixCharacterChanged, m_widgets.editor, &Editor::refreshAutoCalc);
+    connect(this, &MainWindow::resultFormatChanged, m_widgets.display, &ResultDisplay::refresh);
+    connect(this, &MainWindow::resultFormatChanged, m_widgets.editor, &Editor::refreshAutoCalc);
+    connect(this, &MainWindow::resultPrecisionChanged, m_widgets.display, &ResultDisplay::refresh);
+    connect(this, &MainWindow::resultPrecisionChanged, m_widgets.editor, &Editor::refreshAutoCalc);
+    connect(this, &MainWindow::colorSchemeChanged, m_widgets.display, &ResultDisplay::rehighlight);
+    connect(this, &MainWindow::colorSchemeChanged, m_widgets.editor, &Editor::rehighlight);
     connect(m_actionGroups.colorScheme, &QActionGroup::hovered, this, &MainWindow::applyColorSchemeFromAction);
     connect(m_menus.colorScheme, &QMenu::aboutToHide, this, &MainWindow::revertColorScheme);
     connect(m_menus.colorScheme, &QMenu::aboutToShow, this, &MainWindow::saveColorSchemeToRevert);
-    connect(this, SIGNAL(syntaxHighlightingChanged()), m_widgets.display, SLOT(rehighlight()));
-    connect(this, SIGNAL(syntaxHighlightingChanged()), m_widgets.editor, SLOT(rehighlight()));
+    connect(this, &MainWindow::syntaxHighlightingChanged, m_widgets.display, &ResultDisplay::rehighlight);
+    connect(this, &MainWindow::syntaxHighlightingChanged, m_widgets.editor, &Editor::rehighlight);
 
-    connect(m_actions.settingsDisplayFont, SIGNAL(triggered()), SLOT(showFontDialog()));
+    connect(m_actions.settingsDisplayFont, &QAction::triggered, this, &MainWindow::showFontDialog);
 
     const auto schemes = m_actions.settingsDisplayColorSchemes;
     for (auto& action : schemes) // TODO: Use Qt 5.7's qAsConst();
-        connect(action, SIGNAL(triggered()), SLOT(applySelectedColorScheme()));
+        connect(action, &QAction::triggered, this, &MainWindow::applySelectedColorScheme);
 
-    connect(this, SIGNAL(languageChanged()), SLOT(retranslateText()));
+    connect(this, &MainWindow::languageChanged, this, &MainWindow::retranslateText);
 }
 
 void MainWindow::applySettings()
@@ -990,8 +990,7 @@ void MainWindow::applySettings()
         // We couldn't restore the saved geometry; that means it was either empty
         // or just isn't valid anymore so we use default size and position.
         resize(640, 480);
-        QDesktopWidget* desktop = QApplication::desktop();
-        QRect screen = desktop->availableGeometry(this);
+        QRect screen = this->screen()->availableGeometry();
         move(screen.center() - rect().center());
     }
     restoreState(m_settings->windowState);
@@ -1071,7 +1070,7 @@ void MainWindow::applySettings()
     }
 
     if (m_widgets.display->isEmpty())
-        QTimer::singleShot(0, this, SLOT(showReadyMessage()));
+        QTimer::singleShot(0, this, &MainWindow::showReadyMessage);
 }
 
 void MainWindow::showManualWindow()
@@ -1086,7 +1085,7 @@ void MainWindow::showManualWindow()
     if (!m_widgets.manual->restoreGeometry(m_settings->manualWindowGeometry))
         m_widgets.manual->resize(640, 480);
     m_widgets.manual->show();
-    connect(m_widgets.manual, SIGNAL(windowClosed()), SLOT(handleManualClosed()));
+    connect(m_widgets.manual, &ManualWindow::windowClosed, this, &MainWindow::handleManualClosed);
 }
 
 void MainWindow::showContextHelp()
@@ -1224,7 +1223,7 @@ MainWindow::MainWindow()
     applySettings();
 
     m_manualServer = ManualServer::instance();
-    connect(this, SIGNAL(languageChanged()), m_manualServer, SLOT(ensureCorrectLanguage()));
+    connect(this, &MainWindow::languageChanged, m_manualServer, &ManualServer::ensureCorrectLanguage);
 }
 
 MainWindow::~MainWindow()

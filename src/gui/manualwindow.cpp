@@ -42,8 +42,8 @@ ManualWindow::ManualWindow(QWidget* parent)
 
     //Disable automatic opening of links. We handle them ourselves.
     this->setOpenLinks(false);
-    connect(this, SIGNAL(anchorClicked(const QUrl&)), SLOT(handleAnchorClick(const QUrl&)));
-    connect(this, SIGNAL(sourceChanged(const QUrl&)), SLOT(handleSourceChanged(const QUrl&)));
+    connect(this, &QTextBrowser::anchorClicked, this, &ManualWindow::handleAnchorClick);
+    connect(this, &QTextBrowser::sourceChanged, this, &ManualWindow::handleSourceChanged);
 
     m_server = ManualServer::instance();
     showHelpForKeyword("home");

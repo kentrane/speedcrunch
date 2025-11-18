@@ -89,12 +89,12 @@ VariableListWidget::VariableListWidget(QWidget* parent)
 
     retranslateText();
 
-    connect(m_filterTimer, SIGNAL(timeout()), SLOT(updateList()));
-    connect(m_searchFilter, SIGNAL(textChanged(const QString&)), SLOT(triggerFilter()));
-    connect(m_variables, SIGNAL(itemActivated(QTreeWidgetItem*, int)), SLOT(activateItem()));
-    connect(m_insertAction, SIGNAL(triggered()), SLOT(activateItem()));
-    connect(m_deleteAction, SIGNAL(triggered()), SLOT(deleteItem()));
-    connect(m_deleteAllAction, SIGNAL(triggered()), SLOT(deleteAllItems()));
+    connect(m_filterTimer, &QTimer::timeout, this, &VariableListWidget::updateList);
+    connect(m_searchFilter, &QLineEdit::textChanged, this, &VariableListWidget::triggerFilter);
+    connect(m_variables, &QTreeWidget::itemActivated, this, &VariableListWidget::activateItem);
+    connect(m_insertAction, &QAction::triggered, this, &VariableListWidget::activateItem);
+    connect(m_deleteAction, &QAction::triggered, this, &VariableListWidget::deleteItem);
+    connect(m_deleteAllAction, &QAction::triggered, this, &VariableListWidget::deleteAllItems);
 
     updateList();
 }
@@ -157,7 +157,7 @@ void VariableListWidget::retranslateText()
     m_deleteAction->setText(tr("Delete"));
     m_deleteAllAction->setText(tr("Delete All"));
 
-    QTimer::singleShot(0, this, SLOT(updateList()));
+    QTimer::singleShot(0, this, &VariableListWidget::updateList);
 }
 
 QTreeWidgetItem* VariableListWidget::currentItem() const

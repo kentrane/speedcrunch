@@ -627,14 +627,14 @@ bool Evaluator::isRadixChar(const QChar& ch)
 bool Evaluator::isSeparatorChar(const QChar& ch)
 {
     // Match everything that is not alphanumeric or an operator or NUL.
-    static const QRegExp s_separatorRE(
+    static const QRegularExpression s_separatorRE(
         "[^a-zA-Z0-9\\+\\-−\\*×⋅÷/\\^;\\(\\)%!=\\\\&\\|<>\\?#\\x0000]"
     );
 
     if (isRadixChar(ch))
         return false;
 
-    return s_separatorRE.exactMatch(ch);
+    return s_separatorRE.match(ch).hasMatch();
 }
 
 QString Evaluator::fixNumberRadix(const QString& number)
@@ -691,7 +691,7 @@ QString Evaluator::fixNumberRadix(const QString& number)
 HNumber getNumber(const QString& number) {
     if (number.size() == 0)
         return HNumber(0);
-    int endPos = number.indexOf(QRegExp("['\":]"));
+    int endPos = number.indexOf(QRegularExpression("['\":]"));
     if (endPos == 0)
         return HNumber(0);
     if (endPos > 0)

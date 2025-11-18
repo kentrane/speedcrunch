@@ -141,7 +141,7 @@ public:
     EditorCompletion(Editor*);
     ~EditorCompletion();
 
-    bool eventFilter(QObject*, QEvent*);
+    bool eventFilter(QObject*, QEvent*) override;
     void showCompletion(const QStringList&);
 
 signals:
@@ -165,7 +165,7 @@ public:
     ConstantCompletion(Editor*);
     ~ConstantCompletion();
 
-    bool eventFilter(QObject*, QEvent*);
+    bool eventFilter(QObject*, QEvent*) override;
     void showCompletion();
 
 signals:

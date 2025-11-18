@@ -29,7 +29,7 @@
 #include "core/session.h"
 
 #include <QApplication>
-#include <QDesktopWidget>
+#include <QScreen>
 #include <QEvent>
 #include <QFont>
 #include <QFrame>
@@ -79,8 +79,8 @@ Editor::Editor(QWidget* parent)
 
     connect(m_completion, &EditorCompletion::selectedCompletion,
             this, &Editor::autoComplete);
-    connect(m_completionTimer, SIGNAL(timeout()), SLOT(triggerAutoComplete()));
-    connect(m_matchingTimer, SIGNAL(timeout()), SLOT(doMatchingPar()));
+    connect(m_completionTimer, &QTimer::timeout, this, &Editor::triggerAutoComplete);
+    connect(m_matchingTimer, &QTimer::timeout, this, &Editor::doMatchingPar);
     connect(this, &Editor::selectionChanged, this, &Editor::checkSelectionAutoCalc);
     connect(this, &Editor::textChanged, this, &Editor::checkAutoCalc);
     connect(this, &Editor::textChanged, this, &Editor::checkAutoComplete);
@@ -733,7 +733,7 @@ void Editor::keyPressEvent(QKeyEvent* event)
 
     case Qt::Key_Enter:
     case Qt::Key_Return:
-        QTimer::singleShot(0, this, SLOT(triggerEnter()));
+        QTimer::singleShot(0, this, &Editor::triggerEnter);
         event->accept();
         return;
 
@@ -789,8 +789,8 @@ void Editor::keyPressEvent(QKeyEvent* event)
         {
             m_constantCompletion = new ConstantCompletion(this);
             connect(m_constantCompletion,
-                    SIGNAL(selectedCompletion(const QString&)),
-                    SLOT(insertConstant(const QString&)));
+                    &ConstantCompletion::selectedCompletion,
+                    this, &Editor::insertConstant);
             connect(m_constantCompletion,
                     &ConstantCompletion::canceledCompletion,
                     this, &Editor::cancelConstantCompletion);
@@ -925,8 +925,8 @@ EditorCompletion::EditorCompletion(Editor* editor)
     m_popup->setMouseTracking(true);
     m_popup->installEventFilter(this);
 
-    connect(m_popup, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
-            SLOT(doneCompletion()));
+    connect(m_popup, &QTreeWidget::itemClicked,
+            this, &EditorCompletion::doneCompletion);
 
     m_popup->hide();
     m_popup->setParent(0, Qt::Popup);
@@ -1040,7 +1040,7 @@ void EditorCompletion::showCompletion(const QStringList& choices)
     QPoint position = m_editor->mapToGlobal(point);
 
     // If popup is partially invisible, move to other position.
-    auto screen = QApplication::desktop()->availableGeometry(m_editor);
+    auto screen = m_editor->screen()->availableGeometry();
     if (position.y() + height > screen.y() + screen.height())
         position.setY(position.y() - height - m_editor->height());
     if (position.x() + width > screen.x() + screen.width())
@@ -1086,8 +1086,8 @@ ConstantCompletion::ConstantCompletion(Editor* editor)
     m_categoryWidget->installEventFilter(this);
     m_categoryWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
-    connect(m_categoryWidget, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
-                              SLOT(showConstants()));
+    connect(m_categoryWidget, &QTreeWidget::itemClicked,
+                              this, &ConstantCompletion::showConstants);
 
     m_constantWidget = new QTreeWidget(m_popup);
     m_constantWidget->setFrameShape(QFrame::NoFrame);
@@ -1101,13 +1101,13 @@ ConstantCompletion::ConstantCompletion(Editor* editor)
     m_constantWidget->installEventFilter(this);
     m_constantWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
-    connect(m_constantWidget, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
-                              SLOT(doneCompletion()));
+    connect(m_constantWidget, &QTreeWidget::itemClicked,
+                              this, &ConstantCompletion::doneCompletion);
 
     m_slider = new QTimeLine(100, m_popup);
     m_slider->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    connect(m_slider, SIGNAL(frameChanged(int)),
-                      SLOT(setHorizontalPosition(int)));
+    connect(m_slider, &QTimeLine::frameChanged,
+                      this, &ConstantCompletion::setHorizontalPosition);
 
     const Constants* constants = Constants::instance();
     m_constantList = constants->list();
@@ -1297,7 +1297,7 @@ void ConstantCompletion::showCompletion()
     const int width = m_popup->width();
 
     // If popup is partially invisible, move to other position.
-    const QRect screen = QApplication::desktop()->availableGeometry(m_editor);
+    const QRect screen = m_editor->screen()->availableGeometry();
     if (pos.y() + height > screen.y() + screen.height())
         pos.setY(pos.y() - height - m_editor->height());
     if (pos.x() + width > screen.x() + screen.width())

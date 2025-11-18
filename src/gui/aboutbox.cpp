@@ -147,7 +147,7 @@ AboutBox::AboutBox(QWidget* parent, Qt::WindowFlags f)
 
     QPushButton* closeButton = new QPushButton(this);
     closeButton->setText(tr("Close"));
-    connect(closeButton, SIGNAL(clicked(bool)), this, SLOT(close()));
+    connect(closeButton, &QPushButton::clicked, this, &AboutBox::close);
 
     QGridLayout* mainLayout = new QGridLayout(this);
     mainLayout->addWidget(textEdit, 0, 0, 1, 2);

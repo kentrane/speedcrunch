@@ -41,7 +41,7 @@ signals:
     void stateChanged(bool);
 
 protected:
-    void mouseReleaseEvent(QMouseEvent*);
+    void mouseReleaseEvent(QMouseEvent*) override;
 
 private:
     enum {
@@ -64,8 +64,8 @@ signals:
     void bitsChanged(const QString&);
 
 protected:
-    virtual void wheelEvent(QWheelEvent*);
-    virtual void resizeEvent(QResizeEvent*);
+    void wheelEvent(QWheelEvent*) override;
+    void resizeEvent(QResizeEvent*) override;
 
 public slots:
     void clear();

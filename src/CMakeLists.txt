@@ -77,7 +77,7 @@ else()
     add_executable(${APPLICATION_NAME} ${speedcrunch_SOURCES} ${speedcrunch_RESOURCES})
 endif()
 
-set_property(TARGET ${APPLICATION_NAME} PROPERTY CXX_STANDARD 11)
+set_property(TARGET ${APPLICATION_NAME} PROPERTY CXX_STANDARD 17)
 
 add_custom_target(confclean COMMAND rm -rf Makefile CMakeFiles/ CMakeCache.txt cmake_install.cmake DartTestfile.txt install_manifest.txt)
 
@@ -87,26 +87,32 @@ target_link_libraries(${APPLICATION_NAME} ${QT_LIBRARIES} Qt5::Widgets Qt5::Help
 enable_testing()
 
 add_executable(testhmath ${testhmath_SOURCES})
+set_property(TARGET testhmath PROPERTY CXX_STANDARD 17)
 target_link_libraries(testhmath ${QT_LIBRARIES})
 add_test(testhmath testhmath)
 
 add_executable(testevaluator ${testevaluator_SOURCES} ${testevaluator_HEADERS_MOC})
+set_property(TARGET testevaluator PROPERTY CXX_STANDARD 17)
 target_link_libraries(testevaluator ${QT_LIBRARIES})
 add_test(testevaluator testevaluator)
 
 add_executable(testfloatnum ${testfloatnum_SOURCES})
+set_property(TARGET testfloatnum PROPERTY CXX_STANDARD 17)
 set_property(TARGET testfloatnum APPEND PROPERTY COMPILE_DEFINITIONS _FLOATNUMTEST)
 add_test(testfloatnum testfloatnum)
 
 add_executable(testcmath ${testcmath_SOURCES})
+set_property(TARGET testcmath PROPERTY CXX_STANDARD 17)
 target_link_libraries(testcmath ${QT_LIBRARIES})
 add_test(testcmath testcmath)
 
 add_executable(testdmath ${testdmath_SOURCES})
+set_property(TARGET testdmath PROPERTY CXX_STANDARD 17)
 target_link_libraries(testdmath ${QT_LIBRARIES})
 add_test(testdmath testdmath)
 
 add_executable(testser ${testser_SOURCES})
+set_property(TARGET testser PROPERTY CXX_STANDARD 17)
 target_link_libraries(testser ${QT_LIBRARIES})
 add_test(testser testser)
 
