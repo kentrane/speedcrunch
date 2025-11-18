@@ -43,11 +43,11 @@ public slots:
     void retranslateText();
 
 protected:
-    virtual void changeEvent(QEvent*);
-    virtual void keyPressEvent(QKeyEvent * ev);
-    virtual void mouseReleaseEvent(QMouseEvent* ev);
-	virtual void closeEvent(QCloseEvent*);
-    virtual void paintEvent(QPaintEvent* e);
+    void changeEvent(QEvent*) override;
+    void keyPressEvent(QKeyEvent * ev) override;
+    void mouseReleaseEvent(QMouseEvent* ev) override;
+	void closeEvent(QCloseEvent*) override;
+    void paintEvent(QPaintEvent* e) override;
 private slots:
     void handleAnchorClick(const QUrl&url);
     void handleSourceChanged(const QUrl& url);

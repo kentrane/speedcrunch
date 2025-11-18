@@ -89,13 +89,13 @@ UserFunctionListWidget::UserFunctionListWidget(QWidget* parent)
 
     retranslateText();
 
-    connect(m_filterTimer, SIGNAL(timeout()), SLOT(updateList()));
-    connect(m_searchFilter, SIGNAL(textChanged(const QString&)), SLOT(triggerFilter()));
-    connect(m_userFunctions, SIGNAL(itemActivated(QTreeWidgetItem*, int)), SLOT(activateItem()));
-    connect(m_insertAction, SIGNAL(triggered()), SLOT(activateItem()));
-    connect(m_editAction, SIGNAL(triggered()), SLOT(editItem()));
-    connect(m_deleteAction, SIGNAL(triggered()), SLOT(deleteItem()));
-    connect(m_deleteAllAction, SIGNAL(triggered()), SLOT(deleteAllItems()));
+    connect(m_filterTimer, &QTimer::timeout, this, &UserFunctionListWidget::updateList);
+    connect(m_searchFilter, &QLineEdit::textChanged, this, &UserFunctionListWidget::triggerFilter);
+    connect(m_userFunctions, &QTreeWidget::itemActivated, this, &UserFunctionListWidget::activateItem);
+    connect(m_insertAction, &QAction::triggered, this, &UserFunctionListWidget::activateItem);
+    connect(m_editAction, &QAction::triggered, this, &UserFunctionListWidget::editItem);
+    connect(m_deleteAction, &QAction::triggered, this, &UserFunctionListWidget::deleteItem);
+    connect(m_deleteAllAction, &QAction::triggered, this, &UserFunctionListWidget::deleteAllItems);
 
     updateList();
 }
@@ -159,7 +159,7 @@ void UserFunctionListWidget::retranslateText()
     m_deleteAction->setText(tr("Delete"));
     m_deleteAllAction->setText(tr("Delete All"));
 
-    QTimer::singleShot(0, this, SLOT(updateList()));
+    QTimer::singleShot(0, this, &UserFunctionListWidget::updateList);
 }
 
 QTreeWidgetItem* UserFunctionListWidget::currentItem() const

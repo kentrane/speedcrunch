@@ -44,7 +44,7 @@ signals:
 
 protected slots:
     void handleItemActivated(QTreeWidgetItem*, int);
-    virtual void changeEvent(QEvent*);
+    void changeEvent(QEvent*) override;
     void clearSelection(QTreeWidgetItem*);
     void updateList();
     void retranslateText();

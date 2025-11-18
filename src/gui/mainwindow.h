@@ -155,6 +155,10 @@ private slots:
     void setResultFormatScientific();
     void setResultFormatSexagesimal();
     void setResultPrecision15Digits();
+    void setFontSizeSmall();
+    void setFontSizeMedium();
+    void setFontSizeLarge();
+    void setFontSizeExtraLarge();
     void setResultPrecision2Digits();
     void setResultPrecision3Digits();
     void setResultPrecision50Digits();
@@ -183,8 +187,8 @@ private slots:
     void wrapSelection();
 
 protected:
-    virtual void closeEvent(QCloseEvent*);
-    virtual bool eventFilter(QObject*, QEvent*);
+    void closeEvent(QCloseEvent*) override;
+    bool eventFilter(QObject*, QEvent*) override;
 
 private:
     Q_DISABLE_COPY(MainWindow)
@@ -300,6 +304,10 @@ private:
         QAction* settingsDisplayZoomIn;
         QAction* settingsDisplayZoomOut;
         QAction* settingsDisplayFont;
+        QAction* settingsDisplayFontSizeSmall;
+        QAction* settingsDisplayFontSizeMedium;
+        QAction* settingsDisplayFontSizeLarge;
+        QAction* settingsDisplayFontSizeExtraLarge;
         QVector<QAction*> settingsDisplayColorSchemes;
         QAction* settingsRadixCharDefault;
         QAction* settingsRadixCharDot;
@@ -332,6 +340,7 @@ private:
         QMenu* decimal;
         QMenu* digitGrouping;
         QMenu* display;
+        QMenu* fontSize;
         QMenu* edit;
         QMenu* resultFormat;
         QMenu* inputFormat;

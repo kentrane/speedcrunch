@@ -26,7 +26,7 @@ class Book : public PageServer {
 
 public:
     explicit Book(QObject* parent = 0) : PageServer(parent) { createPages(); }
-    virtual void createPages();
+    void createPages() override;
 
 private:
     Q_DISABLE_COPY(Book)

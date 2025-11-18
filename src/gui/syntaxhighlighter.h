@@ -66,7 +66,7 @@ public:
     QColor colorForRole(ColorScheme::Role role) const { return m_colorScheme.colorForRole(role); }
 
     void update();
-    virtual void highlightBlock(const QString&);
+    void highlightBlock(const QString&) override;
     void asHtml(QString& html);
 
 private:

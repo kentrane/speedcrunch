@@ -32,7 +32,7 @@ class TextBrowser : public QTextBrowser {
 public:
     TextBrowser(QWidget* parent) : QTextBrowser(parent) { }
 public slots:
-    virtual void setSource(const QUrl&) { }
+    void setSource(const QUrl&) override { }
 };
 
 class BookDock : public QDockWidget {
@@ -49,7 +49,7 @@ public slots:
     void retranslateText();
 
 protected:
-    virtual void changeEvent(QEvent*);
+    void changeEvent(QEvent*) override;
 
 private slots:
     void handleAnchorClick(const QUrl&);

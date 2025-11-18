@@ -52,7 +52,7 @@ protected slots:
     void emitButtonPressed(int button) const;
 
 protected:
-    virtual void changeEvent(QEvent*);
+    void changeEvent(QEvent*) override;
 
 private:
     Q_DISABLE_COPY(Keypad)

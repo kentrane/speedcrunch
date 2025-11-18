@@ -82,7 +82,7 @@ Keypad::Keypad(QWidget* parent)
     setButtonTooltips();
     disableButtonFocus();
     setLayoutDirection(Qt::LeftToRight);
-    connect(&mapper, SIGNAL(mapped(int)), SLOT(emitButtonPressed(int)));
+    connect(&mapper, qOverload<int>(&QSignalMapper::mapped), this, &Keypad::emitButtonPressed);
 }
 
 void Keypad::handleRadixCharacterChange()
@@ -124,7 +124,7 @@ void Keypad::createButtons()
         const QPair<QPushButton*, const KeyDescription*> hashValue(key, description);
         keys.insert(description->button, hashValue);
 
-        QObject::connect(key, SIGNAL(clicked()), &mapper, SLOT(map()));
+        QObject::connect(key, &QPushButton::clicked, &mapper, qOverload<>(&QSignalMapper::map));
         mapper.setMapping(key, description->button);
     }
 

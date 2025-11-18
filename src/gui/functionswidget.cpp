@@ -76,9 +76,9 @@ FunctionsWidget::FunctionsWidget(QWidget* parent)
 
     retranslateText();
 
-    connect(m_filterTimer, SIGNAL(timeout()), SLOT(updateList()));
-    connect(m_functions, SIGNAL(itemActivated(QTreeWidgetItem*, int)), SLOT(handleItemActivated(QTreeWidgetItem*, int)));
-    connect(m_searchFilter, SIGNAL(textChanged(const QString &)), SLOT(triggerFilter()));
+    connect(m_filterTimer, &QTimer::timeout, this, &FunctionsWidget::updateList);
+    connect(m_functions, &QTreeWidget::itemActivated, this, &FunctionsWidget::handleItemActivated);
+    connect(m_searchFilter, &QLineEdit::textChanged, this, &FunctionsWidget::triggerFilter);
 
     updateList();
 }

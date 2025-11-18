@@ -30,6 +30,7 @@
 #include <QPaintEvent>
 #include <QApplication>
 #include <QPushButton>
+#include <QRegularExpression>
 
 BitWidget::BitWidget(int bitPosition, QWidget* parent)
     : QLabel(parent),
@@ -95,7 +96,7 @@ BitFieldWidget::BitFieldWidget(QWidget* parent) :
     m_bitWidgets.reserve(NumberOfBits);
     for (int i = 0; i < NumberOfBits; ++i) {
         BitWidget* bitWidget = new BitWidget(i);
-        connect(bitWidget, SIGNAL(stateChanged(bool)), this, SLOT(onBitChanged()));
+        connect(bitWidget, &BitWidget::stateChanged, this, &BitFieldWidget::onBitChanged);
         m_bitWidgets.append(bitWidget);
     }
 
@@ -132,19 +133,19 @@ BitFieldWidget::BitFieldWidget(QWidget* parent) :
 
     m_resetButton = new QPushButton("0");
     m_resetButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    connect(m_resetButton, SIGNAL(clicked()), this, SLOT(resetBits()));
+    connect(m_resetButton, &QPushButton::clicked, this, &BitFieldWidget::resetBits);
 
     m_invertButton = new QPushButton("~");
     m_invertButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    connect(m_invertButton, SIGNAL(clicked()), this, SLOT(invertBits()));
+    connect(m_invertButton, &QPushButton::clicked, this, &BitFieldWidget::invertBits);
 
     m_shiftLeftButton = new QPushButton("<<");
     m_shiftLeftButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    connect(m_shiftLeftButton, SIGNAL(clicked()), this, SLOT(shiftBitsLeft()));
+    connect(m_shiftLeftButton, &QPushButton::clicked, this, &BitFieldWidget::shiftBitsLeft);
 
     m_shiftRightButton = new QPushButton(">>");
     m_shiftRightButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    connect(m_shiftRightButton, SIGNAL(clicked()), this, SLOT(shiftBitsRight()));
+    connect(m_shiftRightButton, &QPushButton::clicked, this, &BitFieldWidget::shiftBitsRight);
 
     m_buttonsLayout = new QGridLayout;
     m_buttonsLayout->addWidget(m_resetButton, 0, 0);
@@ -297,7 +298,7 @@ void BitFieldWidget::onBitChanged()
     while (bitsIterator.hasNext())
         expression.prepend(bitsIterator.next()->state() ? "1" : "0");
 
-    expression.remove(QRegExp(QString("^0{,%1}").arg(NumberOfBits - 1)));
+    expression.remove(QRegularExpression(QString("^0{,%1}").arg(NumberOfBits - 1)));
     expression.prepend("0b");
 
     emit bitsChanged(expression);
@@ -305,7 +306,7 @@ void BitFieldWidget::onBitChanged()
 
 void BitFieldWidget::invertBits()
 {
-    foreach (BitWidget* w, m_bitWidgets)
+    for (BitWidget* w : m_bitWidgets)
         w->setState(!w->state());
 
     onBitChanged();

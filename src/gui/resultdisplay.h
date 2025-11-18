@@ -64,9 +64,9 @@ public slots:
     void scrollToTop();
 
 protected:
-    virtual void mouseDoubleClickEvent(QMouseEvent*);
-    virtual void wheelEvent(QWheelEvent*);
-    virtual void timerEvent(QTimerEvent*);
+    void mouseDoubleClickEvent(QMouseEvent*) override;
+    void wheelEvent(QWheelEvent*) override;
+    void timerEvent(QTimerEvent*) override;
     void fullContentScrollEvent();
     float linesPerPage() const { return static_cast<float>(viewport()->height()) / fontMetrics().height(); }
     void pageScrollEvent();

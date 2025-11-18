@@ -43,7 +43,7 @@ protected slots:
     void handleItem(QListWidgetItem *);
 
 protected:
-    void changeEvent(QEvent *);
+    void changeEvent(QEvent *) override;
 
 private:
     Q_DISABLE_COPY(HistoryWidget)

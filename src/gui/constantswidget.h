@@ -49,7 +49,7 @@ protected slots:
     void updateList();
 
 protected:
-    virtual void changeEvent(QEvent*);
+    void changeEvent(QEvent*) override;
 
 private:
     Q_DISABLE_COPY(ConstantsWidget)
